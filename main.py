@@ -1,21 +1,26 @@
 # Germán Andrés Xander 2023
- 
+
 from machine import Pin
+import dht
 import time
+import json
+from collections import OrderedDict
 
-print("esperando pulsador")
-
-sw = Pin(23, Pin.IN)
-led = Pin(2, Pin.OUT)
+d = dht.DHT22(Pin(25))
+print("Sensor temperatura & humedad ...")
 contador=0
 
 while True:
-    if sw.value():
-        contador += 1
-        if contador == 3:
-            print('Pulsacion larga')
-    else:
-        if contador == 1:
-            print('Pulsacion corta')
-        contador = 0
-    time.sleep_ms(200)
+    try:
+        d.measure()
+        temperatura=d.temperature()
+        humedad=d.humidity()
+        datos=json.dumps(OrderedDict([
+            ('temperatura',temperatura),
+            ('humedad',humedad)
+        ]))
+        print(datos)
+    except OSError as e:
+        print("sin sensor")
+
+    time.sleep(20)
